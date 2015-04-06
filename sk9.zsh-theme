@@ -1,21 +1,49 @@
-# ZSH Theme - Preview: http://gyazo.com/8becc8a7ed5ab54a0262a470555c3eed.png
-local return_code="%(?..%{$fg[red]%}%? ↵%{$reset_color%})"
+# fino-time.zsh-theme
 
-local user_host='%{$terminfo[bold]$fg[green]%}%n@%m%{$reset_color%}'
-local current_dir='%{$terminfo[bold]$fg[blue]%} %~%{$reset_color%}'
-local rvm_ruby=''
-if which rvm-prompt &> /dev/null; then
-  rvm_ruby='%{$fg[red]%}‹$(rvm-prompt i v g)›%{$reset_color%}'
-else
-  if which rbenv &> /dev/null; then
-    rvm_ruby='%{$fg[red]%}‹$(rbenv version | sed -e "s/ (set.*$//")›%{$reset_color%}'
-  fi
-fi
-local git_branch='$(git_prompt_info)%{$reset_color%}'
+# Use with a dark background and 256-color terminal!
+# Meant for people with RVM and git. Tested only on OS X 10.7.
 
-PROMPT="╭─${user_host} ${current_dir} ${rvm_ruby} ${git_branch}
-╰─%B$%b "
-RPS1="${return_code}"
+# You can set your computer name in the ~/.box-name file if you want.
 
-ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg[yellow]%}‹"
-ZSH_THEME_GIT_PROMPT_SUFFIX="› %{$reset_color%}"
+# Borrowing shamelessly from these oh-my-zsh themes:
+#   bira
+#   robbyrussell
+#
+# Also borrowing from http://stevelosh.com/blog/2010/02/my-extravagant-zsh-prompt/
+
+function virtualenv_info {
+    [ $VIRTUAL_ENV ] && echo '('`basename $VIRTUAL_ENV`') '
+}
+
+function prompt_char {
+    git branch >/dev/null 2>/dev/null && echo '⠠⠵' && return
+    echo '❯'
+}
+
+function box_name {
+    [ -f ~/.box-name ] && cat ~/.box-name || echo $SHORT_HOST || echo $HOST
+}
+
+
+local rvm_ruby='‹$(rvm-prompt i v g)›%{$reset_color%}'
+local current_dir='${PWD/#$HOME/~}'
+local git_info='$(git_prompt_info)'
+
+
+PROMPT="╭─%{$FG[040]%}%n%{$reset_color%} %{$FG[white]%}at%{$reset_color%} %{$FG[033]%}$(box_name)%{$reset_color%} %{$FG[white]%}in%{$reset_color%} %{$terminfo[bold]$FG[226]%}${current_dir}%{$reset_color%}${git_info} %{$FG[white]%}using%{$FG[125]%}${rvm_ruby}%{$reset_color%}
+╰─$(virtualenv_info)$(prompt_char) "
+
+ZSH_THEME_GIT_PROMPT_PREFIX=" %{$FG[white]%}on%{$reset_color%} %{$fg[255]%}"
+ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
+ZSH_THEME_GIT_PROMPT_DIRTY="%{$FG[202]%}✘"
+ZSH_THEME_GIT_PROMPT_CLEAN="%{$FG[040]%}✔"
+
+RPROMPT='${return_status}$(git_prompt_status) %{$FG[060]%} %*'
+
+ZSH_THEME_GIT_PROMPT_ADDED=" ✚"
+ZSH_THEME_GIT_PROMPT_MODIFIED=" ✹"
+ZSH_THEME_GIT_PROMPT_DELETED=" ✖"
+ZSH_THEME_GIT_PROMPT_RENAMED=" ➜"
+ZSH_THEME_GIT_PROMPT_UNMERGED=" ═"
+ZSH_THEME_GIT_PROMPT_UNTRACKED=" ✭"
+
